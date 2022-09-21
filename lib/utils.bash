@@ -512,45 +512,6 @@ version_to_install="latest"
 # install to WASMTIME_HOME, defaulting to ~/.wasmtime
 install_dir="${WASMTIME_HOME:-"$HOME/.wasmtime"}"
 
-# parse command line options
-while [ $# -gt 0 ]; do
-  arg="$1"
-
-  case "$arg" in
-  -h | --help)
-    usage
-    exit 0
-    ;;
-  --dev)
-    shift # shift off the argument
-    version_to_install="local-dev"
-    ;;
-  --release)
-    shift # shift off the argument
-    version_to_install="local-release"
-    ;;
-  --version)
-    shift # shift off the argument
-    version_to_install="$1"
-    shift # shift off the value
-    ;;
-  --install-dir)
-    shift # shift off the argument
-    install_dir="$1"
-    shift # shift off the value
-    ;;
-  *)
-    error "unknown option: '$arg'"
-    usage
-    exit 1
-    ;;
-  esac
-done
-
-check_architecture "$version_to_install" "$(get_architecture)" "$(uname)" || exit 1
-
-install_version_original "$version_to_install" "$install_dir"
-
 set -euo pipefail
 
 GH_REPO="https://github.com/bytecodealliance/wasmtime"
