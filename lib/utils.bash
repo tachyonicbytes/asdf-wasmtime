@@ -58,7 +58,7 @@ download_release_from_repo() {
   local filename="wasmtime-$version-$arch-$os_info.tar.xz"
   local download_file="$tmpdir/$filename"
   local archive_url="$(release_url)/download/$version/$filename"
-  info "$archive_url"
+  info "$archive_url" ""
 
   curl --progress-bar --show-error --location --fail "$archive_url" \
     --output "$download_file" && echo "$download_file"
@@ -209,11 +209,11 @@ update_profile() {
 
   if [ -z "${detected_profile-}" ]; then
     error "No user profile found."
-    eprintf "Tried \$PROFILE ($PROFILE), ~/.bashrc, ~/.bash_profile, ~/.zshrc, ~/.profile, and ~/.config/fish/config.fish."
+    eprintf "Tried PROFILE (), ~/.bashrc, ~/.bash_profile, ~/.zshrc, ~/.profile, and ~/.config/fish/config.fish."
     eprintf ''
     eprintf "You can either create one of these and try again or add this to the appropriate file:"
     eprintf "$path_str"
-    return 1
+    return 0
   else
     if ! command grep -qc 'WASMTIME_HOME' "$detected_profile"; then
       command printf "$path_str" >>"$detected_profile"
@@ -248,7 +248,6 @@ upgrade_is_ok() {
 # including the openssl info if necessary
 parse_os_info() {
   local uname_str="$1"
-  local openssl_version="$2"
 
   case "$uname_str" in
   Linux)
@@ -503,16 +502,11 @@ check_architecture() {
   return 1
 }
 
-# return if sourced (for testing the functions above)
-return 0 2>/dev/null
-
 # default to installing the latest available version
 version_to_install="latest"
 
 # install to WASMTIME_HOME, defaulting to ~/.wasmtime
 install_dir="${WASMTIME_HOME:-"$HOME/.wasmtime"}"
-
-set -euo pipefail
 
 GH_REPO="https://github.com/bytecodealliance/wasmtime"
 TOOL_NAME="wasmtime"
@@ -531,7 +525,9 @@ sort_versions() {
 }
 
 list_all_versions() {
-  if [ -n "$GITHUB_API_TOKEN" ]; then
+  VALUE=${GITHUB_API_TOKEN:-}
+  arg=""
+  if [ ! -z ${VALUE} ]; then
     arg="-H 'Authorization: token $GITHUB_API_TOKEN'"
   fi
   curl $arg --silent "https://api.github.com/repos/bytecodealliance/wasmtime/releases" |
