@@ -38,7 +38,13 @@ install_version() {
 
   (
     mkdir -p "$install_path"
-    full_path=$(realpath $0)
+    # MacOS
+    if [ $(uname) = "Darwin" ]; then
+	full_path="$(cd "$(dirname "$0")" && pwd -P)"
+    else
+	full_path=$(realpath $0)
+    fi
+
     dir_path=$(dirname $full_path)
     $dir_path/wasmtime-install --version "$version" --install-dir "$install_path"
 
